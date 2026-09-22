@@ -1,0 +1,6 @@
+[submodule "releases/2026.06.0/spack"]
+	path = releases/2026.06.0/spack
+	url = https://github.com/spack/spack.git
+[submodule "releases/2026.06.0/spack-packages"]
+	path = releases/2026.06.0/spack-packages
+	url = https://github.com/spack/spack-packages.git

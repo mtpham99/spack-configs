@@ -1,0 +1,104 @@
+---
+spack:
+  'include:':
+  - path: ../../site
+
+  view: false
+
+  concretizer:
+    reuse: true
+    unify: when_possible
+
+  config:
+    install_tree:
+      # root: /software/spack/2026.06.0/opt
+      root: ./opt
+
+  modules:
+    default:
+      roots:
+        #tcl: /software/spack/2026.06.0/modules/tcl
+        tcl: ./modules/tcl
+        #lmod: /software/spack/2026.06.0/modules/lmod
+        lmod: ./modules/lmod
+
+  repos:
+    builtin:
+      git: https://github.com/spack/spack-packages.git
+      tag: v2026.06.0
+      destination: ./spack-packages
+
+  packages:
+    ucx:
+      require: [+cuda +gdrcopy +xpmem +cma +rc +ud +dc +mlx5_dv +rdmacm +verbs +thread_multiple]
+    ucc:
+      require: [+cuda cuda_arch=none +nccl]
+    nccl:
+      require: [+cuda]
+    gdrcopy:
+      require: [+cuda]
+    xpmem:
+      require: [~kernel-module]
+
+  definitions:
+  - cuda_toolkits:
+    - cuda@12.8.1
+    - cuda@13.0.2
+  - java_toolkits:
+    - openjdk@11.0.31_11
+    - openjdk@17.0.18_8
+    - openjdk@21.0.10_7
+    - openjdk@25.0.2_10
+
+  specs:
+  # bootstrap new compiler used to compile everything else
+  - group: toolchain
+    specs:
+    - gcc@14.3.0
+
+  - group: software
+    needs: [toolchain]
+    override:
+      packages:
+        all:
+          target: [sapphirerapids]
+        c:
+          prefer: [gcc@14.3.0]
+        cxx:
+          prefer: [gcc@14.3.0]
+        fortran:
+          prefer: [gcc@14.3.0]
+    specs:
+    # build core
+    - ninja@1.13.2
+    - cmake@3.31.11
+
+    # sdks, dev, toolkits, etc.
+    - $cuda_toolkits
+    - $java_toolkits
+
+    # compute core
+    - openmpi@5.0.10 +cuda fabrics=ucx,ucc,verbs,xpmem
+    - openblas@0.3.33 threads=openmp
+    - openblas@0.3.33 threads=pthreads
+
+    # langauges
+    - rust@1.96.0
+    - go@1.26.4
+    - julia@1.11.9
+    - python@3.14.5 +optimizations
+    - r@4.3.3 +X
+    - r@4.4.3 +X
+    - r@4.5.3 +X
+
+    # data and geospatial packages for R
+    # serial compilations for compatibility (i.e. no mpi support)
+    - hdf@4.3.1 +szip +shared
+    - hdf5@1.14.6 +cxx +fortran +hl +szip ~mpi
+    - netcdf-c@4.10.0 +byterange +dap +hdf4 +nczarr_zip ~mpi
+    - geos@3.14.1 +shared
+    - gdal@3.13.1 +blosc +deflate +freexl +gif +hdf4 +hdf5 +iconv +libaec +libkml +liblzma +libxml2 +lz4 +netcdf +openjpeg +parquet +pcre2 +poppler +spatialite +webp +xercesc +zstd
+
+    # numerical solvers
+    - ipopt@3.14.14 +java +metis %mumps ~mpi
+...
