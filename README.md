@@ -1,0 +1,1 @@
+# spack-configs
