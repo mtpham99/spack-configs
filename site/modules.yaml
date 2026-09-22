@@ -1,0 +1,74 @@
+---
+modules:
+  prefix_inspections:
+    ./bin:
+      - PATH
+    ./lib:
+      - LIBRARY_PATH
+      - LD_LIBRARY_PATH
+    ./lib64:
+      - LIBRARY_PATH
+      - LD_LIBRARY_PATH
+    ./include:
+      - CPATH
+    ./man:
+      - MANPATH
+    ./share/man:
+      - MANPATH
+    ./share/aclocal:
+      - ACLOCAL_PATH
+    ./lib/pkgconfig:
+      - PKG_CONFIG_PATH
+    ./lib64/pkgconfig:
+      - PKG_CONFIG_PATH
+    ./share/pkgconfig:
+      - PKG_CONFIG_PATH
+    ./:
+      - CMAKE_PREFIX_PATH  
+
+  default:
+    enable:
+      - tcl
+      # - lmod
+
+    tcl:
+      hash_length: 0
+      hide_implicits: true
+      exclude: ["target=x86_64"]  # exclude "external" packages
+      all:
+        autoload: direct
+        environment:
+          set:
+            "{name}_ROOT": "{prefix}"
+      openblas:
+        suffixes:
+          "threads=openmp": omp
+          "threads=pthreads": pthreads
+      projections:
+        all:          "{name}/{version}"
+        openmpi:      "{name}/{version}"
+        "^mpi":       "{name}/{version}-{^mpi.name}{^mpi.version}"
+        "+cuda":      "{name}/{version}-cuda{^cuda.version.up_to_2}"
+        "^mpi +cuda": "{name}/{version}-{^mpi.name}{^mpi.version}-cuda{^cuda.version.up_to_2}"
+        r:            "R/{version}"
+
+    lmod:
+      hash_length: 0
+      hide_implicits: true
+      exclude: ["target=x86_64"]  # exclude "external" packages
+      all:
+        autoload: direct
+        environment:
+          set:
+            "{name}_ROOT": "{prefix}"
+      openblas:
+        suffixes:
+          "threads=openmp": omp
+          "threads=pthreads": pthreads
+      hierarchy:
+        - mpi
+      projections:
+        all:          "{name}/{version}"
+        "+cuda":      "{name}/{version}-cuda{^cuda.version.up_to_2}"
+        r:            "R/{version}"
+...

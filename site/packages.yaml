@@ -1,0 +1,54 @@
+---
+packages:
+  all:
+    target: [x86_64_v3]
+    variants: schedulers=slurm cuda_arch=89,90
+
+  gcc:
+    externals:
+      - spec: gcc@11.5.0
+        prefix: /usr
+        extra_attributes:
+          compilers:
+            c: /usr/bin/gcc
+            cxx: /usr/bin/g++
+            fortran: /usr/bin/gfortran
+
+  slurm:
+    buildable: false
+    externals:
+      - spec: slurm@26.05.4 +pmix
+        prefix: /usr
+  pmix:
+    buildable: false
+    externals:
+      - spec: pmix@5.0.8
+        prefix: /usr
+  munge:
+    buildable: false
+    externals:
+      - spec: munge@0.5.13
+        prefix: /usr
+  rdma-core:
+    buildable: false
+    externals:
+      - spec: rdma-core@54.0
+        prefix: /usr
+
+  openssh:
+    buildable: false
+    externals:
+      - spec: openssh@8.7p1
+        prefix: /usr
+  openssl:
+    buildable: false
+    externals:
+      - spec: openssl@3.2.2
+        prefix: /usr
+
+  apptainer:
+    buildable: false
+    externals:
+      - spec: apptainer@1.5.3
+        prefix: /usr
+...

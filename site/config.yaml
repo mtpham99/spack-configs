@@ -1,0 +1,14 @@
+---
+config:
+  install_tree:
+    padded: 128
+    projections:
+      all: "{architecture.target}/{name}-{version}-{hash}"
+
+  build_stage:
+    - /scratch/$user/spack-stage
+    - $tempdir/$user/spack-stage
+
+  checksum: true
+  deprecated: true  # allow building deprecated packages
+...
