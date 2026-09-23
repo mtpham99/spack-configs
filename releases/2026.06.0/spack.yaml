@@ -11,16 +11,13 @@ spack:
 
   config:
     install_tree:
-      # root: /software/spack/2026.06.0/opt
-      root: ./opt
+      root: /software/spack/2026.06.0/opt
 
   modules:
     default:
       roots:
-        #tcl: /software/spack/2026.06.0/modules/tcl
-        tcl: ./modules/tcl
-        #lmod: /software/spack/2026.06.0/modules/lmod
-        lmod: ./modules/lmod
+        tcl: /software/spack/2026.06.0/modules/tcl
+        lmod: /software/spack/2026.06.0/modules/lmod
 
   repos:
     builtin:
