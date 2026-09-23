@@ -25,26 +25,41 @@ jobs:
       with:
         submodules: true # submodules used for 'spack' and 'spack-packages' for each release
 
-    - name: verify releases/${{ matrix.release }}
+    - name: verify spack.lock (${{ matrix.release }})
       run: |
         SPACK_RELEASE="${GITHUB_WORKSPACE}/releases/${{ matrix.release }}"
         source "${SPACK_RELEASE}/spack/share/spack/setup-env.sh"
 
-        spack --env "$SPACK_RELEASE" concretize --fresh --force
-        git diff --exit-code -- "${SPACK_RELEASE}/spack.lock"
+        SPACK_DISABLE_LOCAL_CONFIG=1
+        SPACK_EMPTY_STORE="$(mktemp -d "${RUNNER_TEMP}/spack-empty-store.XXXXXXXX")"
+        trap 'rm -rf "${SPACK_EMPTY_STORE}"' EXIT
 
-    - name: build releases/${{ matrix.release }}
+        spack --env "$SPACK_RELEASE" --config "config:install_tree:root:${SPACK_EMPTY_STORE}" concretize --fresh --force
+        git diff --stat --exit-code -- "${SPACK_RELEASE}/spack.lock"
+
+    - name: upload regenerated spack.lock (${{ matrix.release }})
+      if: failure()
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: spack-lock-${{ matrix.release }}
+        path: releases/${{ matrix.release }}
+
+    - name: build (${{ matrix.release }})
       run: |
         SPACK_RELEASE="${GITHUB_WORKSPACE}/releases/${{ matrix.release }}"
         source "${SPACK_RELEASE}/spack/share/spack/setup-env.sh"
+
+        SPACK_DISABLE_LOCAL_CONFIG=1
 
         spack --env "$SPACK_RELEASE" install --fail-fast
 
-    - name: push buildcache releases/${{ matrix.release }}
+    - name: push buildcache (${{ matrix.release }})
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       run: |
         SPACK_RELEASE="${GITHUB_WORKSPACE}/releases/${{ matrix.release }}"
         source "${SPACK_RELEASE}/spack/share/spack/setup-env.sh"
+
+        SPACK_DISABLE_LOCAL_CONFIG=1
 
         spack --env "$SPACK_RELEASE" buildcache push --update-index cicd-buildcache
 ...
