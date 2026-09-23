@@ -1,0 +1,6 @@
+---
+mirrors:
+  prod-oci-registry:
+    url: oci+http://localhost:5000/buildcache
+    signed: false
+...
