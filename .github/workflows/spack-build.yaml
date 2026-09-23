@@ -61,5 +61,5 @@ jobs:
 
         SPACK_DISABLE_LOCAL_CONFIG=1
 
-        spack --env "$SPACK_RELEASE" buildcache push --update-index cicd-buildcache
+        spack --env "$SPACK_RELEASE" buildcache push --without-build-dependencies --update-index cicd-buildcache
 ...
