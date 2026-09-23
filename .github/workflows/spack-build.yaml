@@ -1,0 +1,50 @@
+---
+name: spack-build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: [self-hosted]
+
+    concurrency:
+      group: spack-build-${{ github.workflow }}-${{ github.ref }}-${{ matrix.release }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+    strategy:
+      matrix:
+        release: [2026.06.0]
+
+    steps:
+    - name: checkout
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        submodules: true # submodules used for 'spack' and 'spack-packages' for each release
+
+    - name: verify releases/${{ matrix.release }}
+      run: |
+        SPACK_RELEASE="${GITHUB_WORKSPACE}/releases/${{ matrix.release }}"
+        source "${SPACK_RELEASE}/spack/share/spack/setup-env.sh"
+
+        spack --env "$SPACK_RELEASE" concretize --fresh --force
+        git diff --exit-code -- "${SPACK_RELEASE}/spack.lock"
+
+    - name: build releases/${{ matrix.release }}
+      run: |
+        SPACK_RELEASE="${GITHUB_WORKSPACE}/releases/${{ matrix.release }}"
+        source "${SPACK_RELEASE}/spack/share/spack/setup-env.sh"
+
+        spack --env "$SPACK_RELEASE" install --fail-fast
+
+    - name: push buildcache releases/${{ matrix.release }}
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: |
+        SPACK_RELEASE="${GITHUB_WORKSPACE}/releases/${{ matrix.release }}"
+        source "${SPACK_RELEASE}/spack/share/spack/setup-env.sh"
+
+        spack --env "$SPACK_RELEASE" buildcache push --update-index cicd-buildcache
+...
