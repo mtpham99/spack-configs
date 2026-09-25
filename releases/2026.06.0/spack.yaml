@@ -78,6 +78,7 @@ spack:
     - openmpi@5.0.10 +cuda fabrics=ucx,ucc,verbs,xpmem
     - openblas@0.3.33 threads=openmp
     - openblas@0.3.33 threads=pthreads
+    - openblas@0.3.33 threads=none
 
     # langauges
     - rust@1.96.0
